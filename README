@@ -1,0 +1,17 @@
+PDF::Extractor is a library that provides high level access to the text objects of a PDF document.
+
+It is actually a simple wrapper around the pdftohtml command with its '-xml' option, so you need the pdftohtml command in your path to be able to use this library.
+The pdftohtml command is written by Mikhail Kruk (originally written by Gueorgui Ovtcharov and Rainer Dorsch):
+
+http://pdftohtml.sourceforge.net
+
+If you need to have direct (low level) access to a PDF, use pdf-reader instead:
+
+http://github.com/yob/pdf-reader/tree/master
+
+Usage:
+
+  document = PDF::Extractor.open('test.pdf')
+  document.elements.each do |element|
+    puts "#{element.left}, #{element.top}\t'#{element.content}'"
+  end
