@@ -17,9 +17,9 @@ describe 'Extracting a PDF document' do
 		@document = PDF::Extractor.open(@pdf_filename)
 	end
 		
-	it 'should get the width and height of the document' do
-		@document.width.should == 595
-		@document.height.should == 841
+	it 'should get the width and height of a page' do
+		@document.pages[0].width.should == 595
+		@document.pages[0].height.should == 841
 	end
 
 	it 'should get the contents' do
@@ -38,8 +38,8 @@ describe 'Extracting a PDF document' do
 	end
 
 	it 'should get the position of an element' do
-		@document.elements[0].left.should be_between(0, @document.width / 2) # the text is centered
-		@document.elements[0].top.should be_between(30, 60)
+		@document.pages[0].elements[0].left.should be_between(0, @document.pages[0].width / 2) # the text is centered
+		@document.pages[0].elements[0].top.should be_between(30, 60)
 	end
 
 	it 'should get the width and height of an element' do

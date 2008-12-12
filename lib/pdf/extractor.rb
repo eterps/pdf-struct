@@ -102,8 +102,6 @@ class PDF::Extractor::Document
 	end
 
 	def elements; @pages.map{|n| n.elements}.flatten end
-	def width;    @pages.first.width  rescue nil end
-	def height;   @pages.first.height rescue nil end
 
 private
 
