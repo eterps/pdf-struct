@@ -4,7 +4,7 @@ require 'pdf/extractor'
 require 'rubygems'
 require 'pdf/writer'
 
-describe 'Extracting a PDF document' do
+describe 'an opened PDF document', :shared => true do
 	before do
 		pdf = PDF::Writer.new(:paper => 'A4')
 
@@ -16,55 +16,77 @@ describe 'Extracting a PDF document' do
 		pdf.save_as @pdf_filename
 		@document = PDF::Extractor.open(@pdf_filename)
 	end
-		
-	it 'should get the width and height of a page' do
-		@document.pages[0].width.should == 595
-		@document.pages[0].height.should == 841
-	end
-
-	it 'should get the contents' do
-		@document.elements[0].content.should == 'Hello world!'
-		@document.elements[1].content.should == 'Hello again!'
-	end
-
-	it 'should get the contents within a certain page' do
-		@document.pages[0].elements[0].content.should == 'Hello world!'
-		@document.pages[1].elements[0].content.should == 'Hello again!'
-	end
-
-	it 'should get the font name and font size of an element' do
-		@document.elements[0].font.name.should == 'Helvetica'
-		@document.elements[0].font.size.should == 32
-	end
-
-	it 'should get the position of an element' do
-		@document.pages[0].elements[0].left.should be_between(0, @document.pages[0].width / 2) # the text is centered
-		@document.pages[0].elements[0].top.should be_between(30, 60)
-	end
-
-	it 'should get the width and height of an element' do
-		@document.elements[0].width.should be_between(150, 180)
-		@document.elements[0].height.should be_between(20, 40)
-	end
 
 	after do
 		File.delete @pdf_filename
 	end
 end
 
-describe 'Reading a malformed PDF document' do
-	it 'should raise MalformedPDFError if the PDF is malformed' do
-		filename = File.join(Dir.tmpdir, 'bogus.pdf')
-		File.open(filename, 'w'){|f| f.print 'Foo'}
-		lambda do
-			PDF::Extractor.open(filename)
-		end.should raise_error(PDF::Extractor::MalformedPDFError)
-		File.delete filename
+describe 'A document' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @it = @document }
+
+	it 'has pages' do
+		@it.pages.length.should == 2
+	end
+
+	it 'has elements' do
+		@it.elements.length.should == 2
 	end
 end
 
-describe 'Reading a non-readable PDF document' do
-	it 'should raise RuntimeError if the PDF is not readable or not existing' do
+describe 'A page' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @it = @document.pages.first }
+
+	it 'has a width and a height' do
+		@it.width.should  == 595
+		@it.height.should == 841
+	end
+end
+
+describe 'An element' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @page = @document.pages.first; @it = @page.elements.first }
+
+	it 'has a position on a page' do
+		@it.left.should be_between(0, @page.width / 2) # the text is centered
+		@it.top.should  be_between(30, 60)
+	end
+
+	it 'has a width and a height' do
+		@it.width.should  be_between(150, 180)
+		@it.height.should be_between(20, 40)
+	end
+
+	it 'has content' do
+		@it.content == 'Hello world!'
+	end
+end
+
+describe 'A font' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @it = @document.elements.first.font }
+
+	it 'has a name and a size' do
+		@it.name.should == 'Helvetica'
+		@it.size.should == 32
+	end
+end
+
+describe 'A malformed PDF document' do
+	before { File.open(@filename = File.join(Dir.tmpdir, 'bogus.pdf'), 'w'){|f| f.print 'Foo'} }
+	after  { File.delete @filename }
+
+	it 'should raise MalformedPDFError' do
+		lambda do
+			PDF::Extractor.open(@filename)
+		end.should raise_error(PDF::Extractor::MalformedPDFError)
+	end
+end
+
+describe 'A non-readable PDF document' do
+	it 'should raise RuntimeError' do
 		lambda do
 			PDF::Extractor.open('this_file_should_not_exist')
 		end.should raise_error(RuntimeError)
