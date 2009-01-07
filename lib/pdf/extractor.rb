@@ -1,3 +1,4 @@
+require 'rexml/document'
 require 'rexml/streamlistener'
 
 module PDF
@@ -36,13 +37,17 @@ class PDF::Extractor::Element
 end
 
 class PDF::Extractor::Font
-	attr_reader :id, :name, :size
+	attr_reader   :id, :name, :size
+	attr_accessor :style
 
 	def initialize(params = {})
 		@id   = params[:id]
 		@size = params[:size].to_f
 		@name = params[:name]
 	end
+
+	def bold?;   @style == :bold   end
+	def italic?; @style == :italic end
 end
 
 class PDF::Extractor::Page
@@ -57,6 +62,7 @@ end
 
 class PDF::Extractor::Reader
 	include REXML::StreamListener
+
 	attr_reader :pages, :fonts
 
 	def initialize
@@ -86,6 +92,12 @@ class PDF::Extractor::Reader
 				:height => attributes['height'].to_f,
 				:font => @fonts.find{|n| n.id == attributes['font']}
 			)
+		when 'b'
+			@in_text = true
+			@pages.last.elements.last.font.style = :bold
+		when 'i'
+			@in_text = true
+			@pages.last.elements.last.font.style = :italic
 		end
 	end
 

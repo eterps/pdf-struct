@@ -10,7 +10,11 @@ describe 'an opened PDF document', :shared => true do
 
 		pdf.text 'Hello world!', :font_size => 32, :justification => :center
 		pdf.start_new_page
+		pdf.select_font 'Times-Bold'
 		pdf.text 'Hello again!', :font_size => 18, :justification => :center
+		pdf.start_new_page
+		pdf.select_font 'Times-Italic'
+		pdf.text 'Hello once again!', :font_size => 18, :justification => :center
 
 		@pdf_filename = File.join(Dir.tmpdir, 'test.pdf')
 		pdf.save_as @pdf_filename
@@ -27,11 +31,11 @@ describe 'A document' do
 	before{ @it = @document }
 
 	it 'has pages' do
-		@it.pages.length.should == 2
+		@it.pages.length.should == 3
 	end
 
 	it 'has elements' do
-		@it.elements.length.should == 2
+		@it.elements.length.should == 3
 	end
 end
 
@@ -60,7 +64,26 @@ describe 'An element' do
 	end
 
 	it 'has content' do
-		@it.content == 'Hello world!'
+		@it.content.should == 'Hello world!'
+	end
+end
+
+describe 'An italic element' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @page = @document.pages[2]; @it = @page.elements.first }
+
+	it 'has content' do
+		@it.content.should == 'Hello once again!'
+	end
+end
+
+
+describe 'A bold element' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @page = @document.pages[1]; @it = @page.elements.first }
+
+	it 'has content' do
+		@it.content.should == 'Hello again!'
 	end
 end
 
@@ -68,9 +91,38 @@ describe 'A font' do
 	it_should_behave_like 'an opened PDF document'
 	before{ @it = @document.elements.first.font }
 
-	it 'has a name and a size' do
+	it 'has a name' do
 		@it.name.should == 'Helvetica'
+	end
+
+	it 'has a size' do
 		@it.size.should == 32
+	end
+end
+
+describe 'A bold font' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @it = @document.elements[1].font }
+
+	it 'has a name' do
+		@it.name.should == 'Times'
+	end
+
+	it 'is bold' do
+		@it.should be_bold
+	end
+end
+
+describe 'An italic font' do
+	it_should_behave_like 'an opened PDF document'
+	before{ @it = @document.elements[2].font }
+
+	it 'has a name' do
+		@it.name.should == 'Times'
+	end
+
+	it 'is italic' do
+		@it.should be_italic
 	end
 end
 
