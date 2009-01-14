@@ -9,8 +9,8 @@ module PDF
 		def self.open(path)
 			input = `pdftohtml -enc UTF-8 -xml -stdout '#{path}' 2>&1`
 			case input
-			when /command not found/
-				raise ConversionError, 'pdftohtml command not found'
+			#when /command not found/
+			#	raise ConversionError, 'pdftohtml command not found'
 			when /PDF file is damaged/
 				raise MalformedPDFError, "the PDF with filename '#{path}' is malformed"
 			when /Couldn't open file/
@@ -41,11 +41,13 @@ class PDF::Extractor::Font
 	attr_accessor :style
 
 	def initialize(params = {})
-		@id   = params[:id]
-		@size = params[:size].to_f
-		@name = params[:name]
+		@id    = params[:id]
+		@size  = params[:size].to_f
+		@name  = params[:name]
+		@style = :normal
 	end
 
+	def normal?; @style == :normal end
 	def bold?;   @style == :bold   end
 	def italic?; @style == :italic end
 end
